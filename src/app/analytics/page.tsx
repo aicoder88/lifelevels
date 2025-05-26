@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MainLayout } from '@/components/layout/main-layout'
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { LIFE_LEVEL_CATEGORIES } from '@/lib/constants'
-import { TrendingUp, TrendingDown, Calendar, Target, Award, Zap } from 'lucide-react'
+import { TrendingUp, Calendar, Target, Award, Zap } from 'lucide-react'
 
 // Sample data for charts
 const weeklyData = [
@@ -26,7 +26,7 @@ const monthlyTrends = [
   { month: 'Jun', score: 82 }
 ]
 
-const categoryDistribution = Object.entries(LIFE_LEVEL_CATEGORIES).map(([key, category], index) => ({
+const categoryDistribution = Object.entries(LIFE_LEVEL_CATEGORIES).map(([, category], index) => ({
   name: category.label,
   value: [85, 78, 65, 82, 88, 72, 90][index],
   color: `hsl(${index * 51}, 70%, 60%)`

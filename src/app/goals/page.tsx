@@ -86,7 +86,7 @@ const sampleGoals: Goal[] = [
 ]
 
 export default function GoalsPage() {
-  const [goals, setGoals] = useState(sampleGoals)
+  const [goals] = useState(sampleGoals)
   const [filter, setFilter] = useState<'all' | LifeLevelCategory>('all')
 
   const filteredGoals = filter === 'all' 
@@ -309,7 +309,7 @@ export default function GoalsPage() {
               <h3 className="text-lg font-medium mb-2">No goals found</h3>
               <p className="text-muted-foreground mb-4">
                 {filter === 'all' 
-                  ? "You haven't set any goals yet. Start by creating your first goal!"
+                  ? "You haven&apos;t set any goals yet. Start by creating your first goal!"
                   : `No goals found for ${LIFE_LEVEL_CATEGORIES[filter as LifeLevelCategory]?.label}`
                 }
               </p>

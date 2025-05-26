@@ -60,7 +60,7 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [view, setView] = useState<'day' | 'week'>('day')
 
-  const todaysEvents = sampleEvents.filter(event => {
+  const todaysEvents = sampleEvents.filter(() => {
     // For demo purposes, show all events for today
     return true
   })
@@ -183,7 +183,7 @@ export default function CalendarPage() {
               {/* Today's Schedule */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Today's Schedule</CardTitle>
+                  <CardTitle>Today&apos;s Schedule</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">

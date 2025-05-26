@@ -104,6 +104,54 @@ CREATE TABLE streaks (
   UNIQUE(profile_id, category)
 );
 
+-- Spiral Dynamics assessment results
+CREATE TABLE spiral_assessments (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  primary_level TEXT NOT NULL,
+  secondary_level TEXT,
+  level_scores JSONB DEFAULT '{}',
+  assessment_responses JSONB DEFAULT '{}',
+  insights JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Spiral Dynamics progress tracking
+CREATE TABLE spiral_progress (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  current_level TEXT NOT NULL,
+  progress_in_level INTEGER DEFAULT 0, -- 0-100
+  unlocked_levels TEXT[] DEFAULT ARRAY[]::TEXT[],
+  level_completion_dates JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id)
+);
+
+-- Enhanced coach suggestions with Spiral Dynamics integration
+CREATE TABLE enhanced_coach_suggestions (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  level_id UUID REFERENCES life_levels(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  action_items JSONB DEFAULT '[]',
+  estimated_time TEXT,
+  difficulty TEXT CHECK (difficulty IN ('easy', 'medium', 'hard')),
+  impact TEXT CHECK (impact IN ('low', 'medium', 'high')),
+  spiral_level TEXT NOT NULL,
+  aqal_quadrant TEXT NOT NULL,
+  developmental_insight TEXT,
+  next_level_prep TEXT,
+  suggestion_type TEXT NOT NULL,
+  completed BOOLEAN DEFAULT FALSE,
+  dismissed BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Financial accounts table (for Plaid integration)
 CREATE TABLE financial_accounts (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -144,6 +192,11 @@ CREATE INDEX idx_journal_entries_embedding ON journal_entries USING ivfflat (emb
 CREATE INDEX idx_streaks_profile_category ON streaks(profile_id, category);
 CREATE INDEX idx_financial_accounts_profile ON financial_accounts(profile_id);
 CREATE INDEX idx_wearable_integrations_profile ON wearable_integrations(profile_id);
+CREATE INDEX idx_spiral_assessments_profile ON spiral_assessments(profile_id);
+CREATE INDEX idx_spiral_progress_profile ON spiral_progress(profile_id);
+CREATE INDEX idx_enhanced_coach_suggestions_profile ON enhanced_coach_suggestions(profile_id);
+CREATE INDEX idx_enhanced_coach_suggestions_level ON enhanced_coach_suggestions(level_id);
+CREATE INDEX idx_enhanced_coach_suggestions_spiral_level ON enhanced_coach_suggestions(spiral_level);
 
 -- Create materialized view for dashboard performance
 CREATE MATERIALIZED VIEW dashboard_summary AS
@@ -198,6 +251,9 @@ ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE streaks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE financial_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wearable_integrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE spiral_assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE spiral_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enhanced_coach_suggestions ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
@@ -234,6 +290,15 @@ CREATE POLICY "Users can manage own financial accounts" ON financial_accounts FO
 
 -- Wearable integrations policies
 CREATE POLICY "Users can manage own wearable integrations" ON wearable_integrations FOR ALL USING (auth.uid() = profile_id);
+
+-- Spiral assessments policies
+CREATE POLICY "Users can manage own spiral assessments" ON spiral_assessments FOR ALL USING (auth.uid() = profile_id);
+
+-- Spiral progress policies
+CREATE POLICY "Users can manage own spiral progress" ON spiral_progress FOR ALL USING (auth.uid() = profile_id);
+
+-- Enhanced coach suggestions policies
+CREATE POLICY "Users can manage own enhanced coach suggestions" ON enhanced_coach_suggestions FOR ALL USING (auth.uid() = profile_id);
 
 -- Functions for automatic profile creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()

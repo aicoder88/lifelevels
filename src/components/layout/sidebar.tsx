@@ -6,19 +6,20 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { LIFE_LEVEL_CATEGORIES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { 
-  BarChart3, 
-  Calendar, 
-  MessageSquare, 
-  Settings, 
-  Target, 
+import {
+  BarChart3,
+  Calendar,
+  MessageSquare,
+  Settings,
+  Target,
   TrendingUp,
   Menu,
   X,
   Home,
   User,
   Bell,
-  HelpCircle
+  HelpCircle,
+  Brain
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -35,6 +36,12 @@ export function Sidebar({ className }: SidebarProps) {
       href: '/',
       icon: Home,
       description: 'Overview of all life levels'
+    },
+    {
+      title: 'Spiral Journey',
+      href: '/spiral-journey',
+      icon: Brain,
+      description: 'Developmental levels & growth'
     },
     {
       title: 'Analytics',

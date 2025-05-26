@@ -2,15 +2,51 @@
 
 A beautiful, engaging dashboard that scores every "level" of life—Mindset & Maturity, Family/Relationships, Money, Fitness, Health, Skill-Building, Fun & Joy—with the purpose of helping users live a better life that is constantly and never-endingly improving.
 
+**🌀 Now featuring Spiral Dynamics integration for personalized developmental coaching!**
+
 ## ✨ Features
 
 - **🎯 Life Level Tracking**: Monitor 7 key areas of life with visual scoring
+- **🌀 Spiral Dynamics Integration**: Personalized coaching based on your developmental level
+- **🧩 AQAL Framework**: Holistic development across all dimensions of human experience
 - **📊 Beautiful Dashboard**: Radar charts, progress bars, and trend visualizations
-- **🤖 AI Coach**: Personalized suggestions based on your data and goals
+- **🤖 AI Coach**: Level-specific suggestions tailored to your consciousness
+- **🗺️ Developmental Journey**: Visual progression through levels of human development
 - **✅ Daily Checklist**: Gamified task management with points and streaks
 - **📈 Progress Analytics**: Track improvements over time with detailed metrics
 - **🔒 Privacy First**: End-to-end encryption for sensitive data
 - **📱 Responsive Design**: Works perfectly on desktop and mobile
+
+## 🌀 Spiral Dynamics Integration
+
+LifeLevels now incorporates the groundbreaking Spiral Dynamics model to provide coaching that meets you exactly where you are in your development:
+
+### 🎯 Assessment & Identification
+- **5-Question Assessment**: Identify your primary developmental level
+- **Detailed Results**: Understand your worldview, motivators, and communication style
+- **Growth Insights**: Learn about your blind spots and next-level preparation
+
+### 🎨 Developmental Levels
+- **🔴 Red**: Power-focused, immediate results, competitive drive
+- **🔵 Blue**: Structure-oriented, purpose-driven, rule-based
+- **🟠 Orange**: Achievement-focused, data-driven, success-oriented
+- **🟢 Green**: Community-centered, relationship-building, consensus-seeking
+- **🟡 Yellow**: Systems-thinking, complexity-aware, integrative
+- **🔵 Turquoise**: Holistic, globally-conscious, unity-focused
+
+### 🧩 AQAL Quadrants
+- **🧠 I (Individual Interior)**: Personal experience, consciousness, meditation
+- **⚡ It (Individual Exterior)**: Biology, behavior, fitness, health metrics
+- **👥 We (Collective Interior)**: Culture, relationships, shared meaning
+- **🌐 Its (Collective Exterior)**: Systems, structures, financial planning
+
+### 🚀 Smart Features
+- **Level-Specific Coaching**: AI suggestions tailored to your worldview
+- **Growth Edge Preparation**: Guidance for advancing to the next level
+- **AQAL Integration**: Balanced development across all quadrants
+- **Visual Journey Map**: See your progression through all developmental levels
+
+> 📖 **Learn More**: Check out our comprehensive [Spiral Dynamics Guide](SPIRAL_DYNAMICS_GUIDE.md) for detailed explanations and usage instructions.
 
 ## 🛠 Tech Stack
 

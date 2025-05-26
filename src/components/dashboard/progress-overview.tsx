@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { LIFE_LEVEL_CATEGORIES } from '@/lib/constants'
 import { LifeLevelCategory } from '@/lib/database.types'
-import { calculateProgress, getProgressColor } from '@/lib/utils'
+import { calculateProgress } from '@/lib/utils'
 
 interface ProgressItem {
   category: LifeLevelCategory

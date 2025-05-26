@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+// import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { MainLayout } from '@/components/layout/main-layout'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
-import { Heart, Target, TrendingUp, Calendar, Plus, Edit, Activity, Award, Zap } from 'lucide-react'
+import { Heart, Target, Plus, Edit, Activity, Zap } from 'lucide-react'
 
 // Sample data for health tracking
 const weeklyData = [
@@ -26,12 +26,12 @@ const monthlyTrends = [
   { week: 'Week 4', healthScore: 82 }
 ]
 
-const vitals = [
-  { id: '1', name: 'Resting Heart Rate', current: 68, target: 65, unit: 'bpm', trend: 'down', icon: '❤️' },
-  { id: '2', name: 'Blood Pressure', current: '120/80', target: '120/80', unit: 'mmHg', trend: 'stable', icon: '🩺' },
-  { id: '3', name: 'Body Temperature', current: 98.6, target: 98.6, unit: '°F', trend: 'stable', icon: '🌡️' },
-  { id: '4', name: 'Hydration', current: 8, target: 8, unit: 'glasses', trend: 'up', icon: '💧' }
-]
+// const vitals = [
+//   { id: '1', name: 'Resting Heart Rate', current: 68, target: 65, unit: 'bpm', trend: 'down', icon: '❤️' },
+//   { id: '2', name: 'Blood Pressure', current: '120/80', target: '120/80', unit: 'mmHg', trend: 'stable', icon: '🩺' },
+//   { id: '3', name: 'Body Temperature', current: 98.6, target: 98.6, unit: '°F', trend: 'stable', icon: '🌡️' },
+//   { id: '4', name: 'Hydration', current: 8, target: 8, unit: 'glasses', trend: 'up', icon: '💧' }
+// ]
 
 const habits = [
   { id: '1', name: 'Sleep 8+ Hours', target: 8, current: 7.8, unit: 'hours', streak: 5, icon: '😴' },
@@ -68,11 +68,11 @@ const goals = [
 ]
 
 export default function HealthPage() {
-  const [selectedMetric, setSelectedMetric] = useState('sleep')
+  // const [selectedMetric, setSelectedMetric] = useState('sleep')
   
   const currentScore = 82
-  const goalScore = 90
-  const improvement = 8
+  // const goalScore = 90
+  // const improvement = 8
   
   const metrics = [
     { key: 'sleep', label: 'Sleep Quality', value: 7.8, target: 8.0, unit: 'hrs', color: '#6366f1' },
@@ -118,8 +118,7 @@ export default function HealthPage() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {metrics.map((metric) => (
-              <Card key={metric.key} className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => setSelectedMetric(metric.key)}>
+              <Card key={metric.key} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {metric.label}

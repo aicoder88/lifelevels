@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+// import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { MainLayout } from '@/components/layout/main-layout'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
-import { Brain, Target, TrendingUp, Calendar, Plus, Edit, BookOpen, Award, Zap } from 'lucide-react'
+import { Brain, Target, Calendar, Plus, Edit, Zap } from 'lucide-react'
 
 // Sample data for mindset tracking
 const weeklyData = [
@@ -61,11 +61,11 @@ const goals = [
 ]
 
 export default function MindsetMaturityPage() {
-  const [selectedMetric, setSelectedMetric] = useState('meditation')
+  // const [selectedMetric, setSelectedMetric] = useState('meditation')
   
   const currentScore = 78
-  const goalScore = 85
-  const improvement = 12
+  // const goalScore = 85
+  // const improvement = 12
   
   const metrics = [
     { key: 'meditation', label: 'Meditation', value: 18, target: 20, unit: 'min', color: '#8b5cf6' },
@@ -111,8 +111,7 @@ export default function MindsetMaturityPage() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {metrics.map((metric) => (
-              <Card key={metric.key} className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => setSelectedMetric(metric.key)}>
+              <Card key={metric.key} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {metric.label}

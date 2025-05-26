@@ -89,7 +89,7 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Welcome back! 👋</h2>
           <p className="text-muted-foreground">
-            Here's your life overview for today. You're doing great - keep up the momentum!
+            Here&apos;s your life overview for today. You&apos;re doing great - keep up the momentum!
           </p>
         </div>
 

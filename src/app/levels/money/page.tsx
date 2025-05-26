@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+// import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { MainLayout } from '@/components/layout/main-layout'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
-import { DollarSign, Target, TrendingUp, Calendar, Plus, Edit, PiggyBank, Award, Zap } from 'lucide-react'
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
+import { DollarSign, Target, Plus, Edit, PiggyBank, Zap } from 'lucide-react'
 
 // Sample data for money tracking
 const monthlyData = [
@@ -55,7 +55,7 @@ const insights = [
 ]
 
 export default function MoneyPage() {
-  const [selectedMetric, setSelectedMetric] = useState('netWorth')
+  // const [selectedMetric] = useState('netWorth')
   
   const currentNetWorth = 53100
   const goalNetWorth = 100000
@@ -107,8 +107,7 @@ export default function MoneyPage() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {metrics.map((metric) => (
-              <Card key={metric.key} className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => setSelectedMetric(metric.key)}>
+              <Card key={metric.key} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {metric.label}
