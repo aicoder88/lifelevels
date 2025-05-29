@@ -1,231 +1,276 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MainLayout } from '@/components/layout/main-layout'
-import { LifeLevelsRadarChart, sampleRadarData } from '@/components/dashboard/radar-chart'
-import { ProgressOverview, sampleProgressData } from '@/components/dashboard/progress-overview'
-import { DailyChecklist, sampleChecklistData } from '@/components/dashboard/daily-checklist'
-import { AICoach, sampleCoachSuggestions } from '@/components/dashboard/ai-coach'
-import { TrendingUp, Target, Calendar, Sparkles } from 'lucide-react'
+import { APISettings } from '@/components/settings/api-settings'
+import { aiMemory } from '@/lib/ai-memory'
+import { Sparkles, Clock, Settings, CheckCircle2, ArrowRight, X } from 'lucide-react'
 
-export default function DashboardPage() {
-  const [checklistItems, setChecklistItems] = useState(sampleChecklistData)
-  const [coachSuggestions, setCoachSuggestions] = useState(sampleCoachSuggestions)
+interface NextAction {
+  id: string
+  title: string
+  description: string
+  type: 'urgent' | 'important' | 'routine'
+  estimatedTime: string
+  category: string
+  priority: number
+  reasoning: string
+}
 
-  const handleToggleChecklistItem = (id: string) => {
-    setChecklistItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    )
+export default function SimplifiedHomePage() {
+  const [nextAction, setNextAction] = useState<NextAction | null>(null)
+  const [userContext, setUserContext] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [showSettings, setShowSettings] = useState(false)
+
+  // Get personalized greeting
+  const getGreeting = () => {
+    if (!userContext) return "Hello! 👋"
+    
+    const { timeOfDay } = userContext
+    const greetings: Record<string, string> = {
+      morning: "Good morning! 🌅",
+      afternoon: "Good afternoon! ☀️",
+      evening: "Good evening! 🌆",
+      night: "Good night! 🌙"
+    }
+    return greetings[timeOfDay] || "Hello! 👋"
   }
 
-  const handleAcceptSuggestion = (id: string) => {
-    setCoachSuggestions(suggestions =>
-      suggestions.map(suggestion =>
-        suggestion.id === id ? { ...suggestion, completed: true } : suggestion
-      )
-    )
+  // Complete an action
+  const completeAction = async (actionId: string) => {
+    // Update AI memory
+    aiMemory.completeAction(actionId)
+    
+    // Get new context and next action
+    const context = aiMemory.getCurrentContext()
+    const newAction = await aiMemory.determineNextAction()
+    
+    setUserContext(context)
+    setNextAction(newAction)
   }
 
-  const handleDismissSuggestion = (id: string) => {
-    setCoachSuggestions(suggestions =>
-      suggestions.filter(suggestion => suggestion.id !== id)
+  // Initialize on component mount
+  useEffect(() => {
+    const initializeApp = async () => {
+      // Get current context from AI memory
+      const context = aiMemory.getCurrentContext()
+      setUserContext(context)
+      
+      // Get the next action
+      const action = await aiMemory.determineNextAction()
+      setNextAction(action)
+      setIsLoading(false)
+    }
+    
+    initializeApp()
+  }, [])
+
+  // Update time every minute
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const context = aiMemory.getCurrentContext()
+      setUserContext(context)
+      
+      // Check if we need a new action (time-sensitive actions)
+      if (nextAction) {
+        const newAction = await aiMemory.determineNextAction()
+        if (newAction.id !== nextAction.id) {
+          setNextAction(newAction)
+        }
+      }
+    }, 60000)
+    
+    return () => clearInterval(interval)
+  }, [nextAction])
+
+  // Reset daily actions at midnight
+  useEffect(() => {
+    const checkMidnight = () => {
+      const now = new Date()
+      if (now.getHours() === 0 && now.getMinutes() === 0) {
+        aiMemory.resetDailyActions()
+        // Refresh context
+        const context = aiMemory.getCurrentContext()
+        setUserContext(context)
+      }
+    }
+
+    const interval = setInterval(checkMidnight, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Sparkles className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Analyzing your day...</p>
+          </div>
+        </div>
+      </MainLayout>
     )
   }
-
-  const completedTasks = checklistItems.filter(item => item.completed).length
-  const totalTasks = checklistItems.length
-  const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0
 
   return (
     <MainLayout>
-      <div className="min-h-full bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         {/* Header */}
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-white" />
-                  </div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    LifeLevels.AI
-                  </h1>
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</span>
-                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  LifeLevels.AI
+                </h1>
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-primary" />
-                    <span className="font-medium">{Math.round(completionRate)}% Complete</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-600" />
-                    <span className="font-medium">Level 7</span>
-                  </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span>{userContext?.currentTime?.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  }) || new Date().toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  })}</span>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(!showSettings)}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome back! 👋</h2>
-          <p className="text-muted-foreground">
-            Here&apos;s your life overview for today. You&apos;re doing great - keep up the momentum!
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Overall Score
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">74.2</div>
-              <p className="text-xs text-green-600 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +2.3 from last week
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Daily Streak
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12 days</div>
-              <p className="text-xs text-muted-foreground">
-                Personal best: 28 days
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Tasks Today
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {completedTasks}/{totalTasks}
+        {/* Settings Panel */}
+        {showSettings && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h2 className="text-xl font-semibold">Settings</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {Math.round(completionRate)}% complete
-              </p>
-            </CardContent>
-          </Card>
+              <div className="p-6">
+                <APISettings />
+              </div>
+            </div>
+          </div>
+        )}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Level Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Level 7</div>
-              <p className="text-xs text-muted-foreground">
-                340/500 XP to Level 8
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto text-center">
+            {/* Greeting */}
+            <div className="mb-8">
+              <h2 className="text-4xl font-bold mb-2">{getGreeting()}</h2>
+              <p className="text-muted-foreground text-lg">
+                {userContext?.timeOfDay === 'morning' && "Let's start your day with intention"}
+                {userContext?.timeOfDay === 'afternoon' && "Keep the momentum going"}
+                {userContext?.timeOfDay === 'evening' && "Time to wind down and reflect"}
+                {userContext?.timeOfDay === 'night' && "Rest well, tomorrow is a new day"}
+                {!userContext?.timeOfDay && "Ready to make progress?"}
               </p>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Radar Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Life Levels Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <LifeLevelsRadarChart 
-                    data={sampleRadarData} 
-                    className="w-full h-full"
-                  />
+            {/* Next Action Card */}
+            {nextAction && (
+              <Card className="mb-8 border-2 border-primary/20 shadow-lg">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl">What to do right now</CardTitle>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      nextAction.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                      nextAction.type === 'important' ? 'bg-orange-100 text-orange-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {nextAction.type}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">{nextAction.title}</h3>
+                    <p className="text-muted-foreground text-lg">{nextAction.description}</p>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      <span>{nextAction.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-primary rounded-full"></span>
+                      <span className="capitalize">{nextAction.category.replace('_', ' ')}</span>
+                    </div>
+                  </div>
+                  
+                  {/* AI Reasoning */}
+                  <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">Why now:</span> {nextAction.reasoning}
+                    </p>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <Button 
+                      size="lg" 
+                      className="w-full text-lg py-6"
+                      onClick={() => completeAction(nextAction.id)}
+                    >
+                      <CheckCircle2 className="w-5 h-5 mr-2" />
+                      Complete This Action
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Progress Summary */}
+            <div className="text-center text-muted-foreground">
+              <p className="text-sm">
+                {userContext?.completedToday?.length || 0} actions completed today
+              </p>
+              <div className="flex justify-center gap-2 mt-2">
+                {Array.from({ length: Math.min(userContext?.completedToday?.length || 0, 10) }).map((_, i) => (
+                  <div key={i} className="w-2 h-2 bg-primary rounded-full"></div>
+                ))}
+              </div>
+              
+              {/* Current Streaks */}
+              {userContext?.streaks && Object.keys(userContext.streaks).length > 0 && (
+                <div className="mt-4 flex justify-center gap-4 text-xs">
+                  {Object.entries(userContext.streaks).slice(0, 3).map(([category, streak]: [string, any]) => (
+                    <div key={category} className="flex items-center gap-1">
+                      <span className="capitalize">{category.replace('_', ' ')}</span>
+                      <span className="font-medium">{streak.current}🔥</span>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* AI Coach */}
-            <AICoach
-              suggestions={coachSuggestions}
-              onAcceptSuggestion={handleAcceptSuggestion}
-              onDismissSuggestion={handleDismissSuggestion}
-              onGenerateNew={() => {
-                // In a real app, this would call an API to generate new suggestions
-                console.log('Generating new suggestions...')
-              }}
-            />
+              )}
+            </div>
           </div>
-
-          {/* Right Column */}
-          <div className="space-y-8">
-            {/* Progress Overview */}
-            <ProgressOverview data={sampleProgressData} />
-
-            {/* Daily Checklist */}
-            <DailyChecklist
-              items={checklistItems}
-              onToggleItem={handleToggleChecklistItem}
-              onAddItem={() => {
-                // In a real app, this would open a modal to add new tasks
-                console.log('Adding new task...')
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-12 p-6 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg border">
-          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-              <span className="text-2xl">📊</span>
-              <span className="text-sm">View Analytics</span>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-              <span className="text-2xl">🎯</span>
-              <span className="text-sm">Set Goals</span>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-              <span className="text-2xl">📝</span>
-              <span className="text-sm">Journal Entry</span>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-              <span className="text-2xl">🤖</span>
-              <span className="text-sm">Chat with AI</span>
-            </Button>
-          </div>
-        </div>
-      </main>
+        </main>
       </div>
     </MainLayout>
   )

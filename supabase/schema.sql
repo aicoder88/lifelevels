@@ -366,6 +366,185 @@ CREATE TRIGGER update_financial_accounts_updated_at BEFORE UPDATE ON financial_a
 CREATE TRIGGER update_wearable_integrations_updated_at BEFORE UPDATE ON wearable_integrations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Spiral Dynamics Progression System Tables
+
+-- Journey state tracking for the 6-step progression mechanics
+CREATE TABLE spiral_journey_states (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  current_step INTEGER DEFAULT 1, -- 1-6 for the mechanics
+  step_progress INTEGER DEFAULT 0, -- 0-100
+  readiness_signals JSONB DEFAULT '{}',
+  problem_pressure_score INTEGER DEFAULT 0,
+  cognitive_bandwidth_score INTEGER DEFAULT 100,
+  window_opportunity_open BOOLEAN DEFAULT FALSE,
+  next_level_glimpses_count INTEGER DEFAULT 0,
+  supportive_container_strength INTEGER DEFAULT 0,
+  practice_integration_score INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id)
+);
+
+-- Growth challenges database
+CREATE TABLE growth_challenges (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  spiral_level TEXT NOT NULL,
+  target_step INTEGER NOT NULL, -- Which of the 6 steps this addresses
+  challenge_type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  upgrade_tools JSONB DEFAULT '[]',
+  xp_reward INTEGER DEFAULT 10,
+  difficulty_level INTEGER DEFAULT 1, -- 1-5
+  estimated_time TEXT DEFAULT '15 minutes',
+  success_criteria JSONB DEFAULT '{}',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Progression triggers for detecting readiness
+CREATE TABLE progression_triggers (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  trigger_type TEXT NOT NULL, -- 'problem_pressure', 'bandwidth_ready', etc.
+  trigger_data JSONB DEFAULT '{}',
+  is_active BOOLEAN DEFAULT TRUE,
+  fired_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Level transitions tracking
+CREATE TABLE level_transitions (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  from_level TEXT NOT NULL,
+  to_level TEXT NOT NULL,
+  transition_date TIMESTAMPTZ DEFAULT NOW(),
+  preparation_duration INTERVAL,
+  integration_score INTEGER DEFAULT 0,
+  success_indicators JSONB DEFAULT '{}',
+  is_completed BOOLEAN DEFAULT FALSE
+);
+
+-- User challenge completions
+CREATE TABLE challenge_completions (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  challenge_id UUID REFERENCES growth_challenges(id) ON DELETE CASCADE NOT NULL,
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
+  xp_earned INTEGER DEFAULT 0,
+  quality_score INTEGER, -- 1-5 rating of completion quality
+  insights JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- XP and progression tracking
+CREATE TABLE spiral_xp_log (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  xp_type TEXT NOT NULL, -- 'foundation', 'growth_edge', 'integration', 'mastery', 'transition'
+  xp_amount INTEGER NOT NULL,
+  source_type TEXT NOT NULL, -- 'challenge', 'daily_task', 'milestone', etc.
+  source_id UUID,
+  spiral_level TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Achievement badges
+CREATE TABLE spiral_achievements (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  achievement_type TEXT NOT NULL,
+  achievement_name TEXT NOT NULL,
+  description TEXT,
+  spiral_level TEXT,
+  earned_at TIMESTAMPTZ DEFAULT NOW(),
+  metadata JSONB DEFAULT '{}'
+);
+
+-- Create indexes for performance
+CREATE INDEX idx_spiral_journey_states_profile ON spiral_journey_states(profile_id);
+CREATE INDEX idx_growth_challenges_level_step ON growth_challenges(spiral_level, target_step);
+CREATE INDEX idx_growth_challenges_active ON growth_challenges(is_active);
+CREATE INDEX idx_progression_triggers_profile ON progression_triggers(profile_id);
+CREATE INDEX idx_progression_triggers_active ON progression_triggers(is_active);
+CREATE INDEX idx_level_transitions_profile ON level_transitions(profile_id);
+CREATE INDEX idx_challenge_completions_profile ON challenge_completions(profile_id);
+CREATE INDEX idx_challenge_completions_challenge ON challenge_completions(challenge_id);
+CREATE INDEX idx_spiral_xp_log_profile ON spiral_xp_log(profile_id);
+CREATE INDEX idx_spiral_xp_log_level ON spiral_xp_log(spiral_level);
+CREATE INDEX idx_spiral_achievements_profile ON spiral_achievements(profile_id);
+
+-- RLS policies for new tables
+ALTER TABLE spiral_journey_states ENABLE ROW LEVEL SECURITY;
+ALTER TABLE growth_challenges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE progression_triggers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE level_transitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE challenge_completions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE spiral_xp_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE spiral_achievements ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+CREATE POLICY "Users can manage own journey states" ON spiral_journey_states FOR ALL USING (auth.uid() = profile_id);
+CREATE POLICY "Anyone can read active challenges" ON growth_challenges FOR SELECT USING (is_active = true);
+CREATE POLICY "Users can manage own triggers" ON progression_triggers FOR ALL USING (auth.uid() = profile_id);
+CREATE POLICY "Users can manage own transitions" ON level_transitions FOR ALL USING (auth.uid() = profile_id);
+CREATE POLICY "Users can manage own completions" ON challenge_completions FOR ALL USING (auth.uid() = profile_id);
+CREATE POLICY "Users can manage own xp log" ON spiral_xp_log FOR ALL USING (auth.uid() = profile_id);
+CREATE POLICY "Users can manage own achievements" ON spiral_achievements FOR ALL USING (auth.uid() = profile_id);
+
+-- Function to initialize spiral journey for new users
+CREATE OR REPLACE FUNCTION initialize_spiral_journey(user_id UUID, primary_level TEXT DEFAULT 'orange')
+RETURNS void AS $$
+BEGIN
+  -- Create initial journey state
+  INSERT INTO spiral_journey_states (profile_id, current_step, cognitive_bandwidth_score)
+  VALUES (user_id, 1, 100)
+  ON CONFLICT (profile_id) DO NOTHING;
+  
+  -- Create initial spiral progress if not exists
+  INSERT INTO spiral_progress (profile_id, current_level, progress_in_level, unlocked_levels)
+  VALUES (user_id, primary_level, 0, ARRAY[primary_level]::TEXT[])
+  ON CONFLICT (profile_id) DO NOTHING;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Update the handle_new_user function to include spiral initialization
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, display_name)
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'display_name');
+  
+  -- Create default life levels
+  INSERT INTO public.life_levels (profile_id, category, goal_jsonb)
+  VALUES
+    (NEW.id, 'mindset_maturity', '{"meditation_minutes": 20, "gratitude_entries": 3, "goal_progress": 80}'),
+    (NEW.id, 'family_relationships', '{"quality_time_hours": 2, "communication_score": 8}'),
+    (NEW.id, 'money', '{"net_worth": 100000, "savings_rate": 20}'),
+    (NEW.id, 'fitness', '{"weight": 180, "body_fat_percentage": 15, "workout_duration": 60}'),
+    (NEW.id, 'health', '{"sleep_hours": 8, "sleep_quality": 8, "stress_level": 3}'),
+    (NEW.id, 'skill_building', '{"study_hours": 1, "courses_completed": 1}'),
+    (NEW.id, 'fun_joy', '{"leisure_hours": 2, "social_activities": 3}');
+  
+  -- Create default streaks
+  INSERT INTO public.streaks (profile_id, category, current_streak, longest_streak)
+  SELECT NEW.id, category, 0, 0
+  FROM unnest(enum_range(NULL::life_level_category)) AS category;
+  
+  -- Initialize spiral journey (default to orange level)
+  PERFORM initialize_spiral_journey(NEW.id, 'orange');
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Add updated_at triggers for new tables
+CREATE TRIGGER update_spiral_journey_states_updated_at BEFORE UPDATE ON spiral_journey_states
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Function to refresh materialized view
 CREATE OR REPLACE FUNCTION refresh_dashboard_summary()
 RETURNS void AS $$

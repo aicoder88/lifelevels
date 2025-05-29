@@ -142,6 +142,330 @@ export interface Database {
           updated_at?: string
         }
       }
+      spiral_journey_states: {
+        Row: {
+          id: string
+          profile_id: string
+          current_step: number
+          step_progress: number
+          readiness_signals: Json
+          problem_pressure_score: number
+          cognitive_bandwidth_score: number
+          window_opportunity_open: boolean
+          next_level_glimpses_count: number
+          supportive_container_strength: number
+          practice_integration_score: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          current_step?: number
+          step_progress?: number
+          readiness_signals?: Json
+          problem_pressure_score?: number
+          cognitive_bandwidth_score?: number
+          window_opportunity_open?: boolean
+          next_level_glimpses_count?: number
+          supportive_container_strength?: number
+          practice_integration_score?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          current_step?: number
+          step_progress?: number
+          readiness_signals?: Json
+          problem_pressure_score?: number
+          cognitive_bandwidth_score?: number
+          window_opportunity_open?: boolean
+          next_level_glimpses_count?: number
+          supportive_container_strength?: number
+          practice_integration_score?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      growth_challenges: {
+        Row: {
+          id: string
+          spiral_level: string
+          target_step: number
+          challenge_type: string
+          title: string
+          description: string
+          upgrade_tools: Json
+          xp_reward: number
+          difficulty_level: number
+          estimated_time: string
+          success_criteria: Json
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          spiral_level: string
+          target_step: number
+          challenge_type: string
+          title: string
+          description: string
+          upgrade_tools?: Json
+          xp_reward?: number
+          difficulty_level?: number
+          estimated_time?: string
+          success_criteria?: Json
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          spiral_level?: string
+          target_step?: number
+          challenge_type?: string
+          title?: string
+          description?: string
+          upgrade_tools?: Json
+          xp_reward?: number
+          difficulty_level?: number
+          estimated_time?: string
+          success_criteria?: Json
+          is_active?: boolean
+          created_at?: string
+        }
+      }
+      progression_triggers: {
+        Row: {
+          id: string
+          profile_id: string
+          trigger_type: string
+          trigger_data: Json
+          is_active: boolean
+          fired_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          trigger_type: string
+          trigger_data?: Json
+          is_active?: boolean
+          fired_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          trigger_type?: string
+          trigger_data?: Json
+          is_active?: boolean
+          fired_at?: string | null
+          created_at?: string
+        }
+      }
+      level_transitions: {
+        Row: {
+          id: string
+          profile_id: string
+          from_level: string
+          to_level: string
+          transition_date: string
+          preparation_duration: string | null
+          integration_score: number
+          success_indicators: Json
+          is_completed: boolean
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          from_level: string
+          to_level: string
+          transition_date?: string
+          preparation_duration?: string | null
+          integration_score?: number
+          success_indicators?: Json
+          is_completed?: boolean
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          from_level?: string
+          to_level?: string
+          transition_date?: string
+          preparation_duration?: string | null
+          integration_score?: number
+          success_indicators?: Json
+          is_completed?: boolean
+        }
+      }
+      challenge_completions: {
+        Row: {
+          id: string
+          profile_id: string
+          challenge_id: string
+          completed_at: string
+          xp_earned: number
+          quality_score: number | null
+          insights: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          challenge_id: string
+          completed_at?: string
+          xp_earned?: number
+          quality_score?: number | null
+          insights?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          challenge_id?: string
+          completed_at?: string
+          xp_earned?: number
+          quality_score?: number | null
+          insights?: Json
+          created_at?: string
+        }
+      }
+      spiral_xp_log: {
+        Row: {
+          id: string
+          profile_id: string
+          xp_type: string
+          xp_amount: number
+          source_type: string
+          source_id: string | null
+          spiral_level: string
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          xp_type: string
+          xp_amount: number
+          source_type: string
+          source_id?: string | null
+          spiral_level: string
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          xp_type?: string
+          xp_amount?: number
+          source_type?: string
+          source_id?: string | null
+          spiral_level?: string
+          description?: string | null
+          created_at?: string
+        }
+      }
+      spiral_achievements: {
+        Row: {
+          id: string
+          profile_id: string
+          achievement_type: string
+          achievement_name: string
+          description: string | null
+          spiral_level: string | null
+          earned_at: string
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          achievement_type: string
+          achievement_name: string
+          description?: string | null
+          spiral_level?: string | null
+          earned_at?: string
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          achievement_type?: string
+          achievement_name?: string
+          description?: string | null
+          spiral_level?: string | null
+          earned_at?: string
+          metadata?: Json
+        }
+      }
+      spiral_assessments: {
+        Row: {
+          id: string
+          profile_id: string
+          primary_level: string
+          secondary_level: string | null
+          level_scores: Json
+          assessment_responses: Json
+          insights: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          primary_level: string
+          secondary_level?: string | null
+          level_scores?: Json
+          assessment_responses?: Json
+          insights?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          primary_level?: string
+          secondary_level?: string | null
+          level_scores?: Json
+          assessment_responses?: Json
+          insights?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      spiral_progress: {
+        Row: {
+          id: string
+          profile_id: string
+          current_level: string
+          progress_in_level: number
+          unlocked_levels: string[]
+          level_completion_dates: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          current_level: string
+          progress_in_level?: number
+          unlocked_levels?: string[]
+          level_completion_dates?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          current_level?: string
+          progress_in_level?: number
+          unlocked_levels?: string[]
+          level_completion_dates?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -169,6 +493,47 @@ export type LifeLevel = Database['public']['Tables']['life_levels']['Row']
 export type Entry = Database['public']['Tables']['entries']['Row']
 export type CoachAction = Database['public']['Tables']['coach_actions']['Row']
 export type Supplement = Database['public']['Tables']['supplements']['Row']
+
+// Spiral Dynamics types
+export type SpiralJourneyState = Database['public']['Tables']['spiral_journey_states']['Row']
+export type GrowthChallenge = Database['public']['Tables']['growth_challenges']['Row']
+export type ProgressionTrigger = Database['public']['Tables']['progression_triggers']['Row']
+export type LevelTransition = Database['public']['Tables']['level_transitions']['Row']
+export type ChallengeCompletion = Database['public']['Tables']['challenge_completions']['Row']
+export type SpiralXpLog = Database['public']['Tables']['spiral_xp_log']['Row']
+export type SpiralAchievement = Database['public']['Tables']['spiral_achievements']['Row']
+export type SpiralAssessment = Database['public']['Tables']['spiral_assessments']['Row']
+export type SpiralProgress = Database['public']['Tables']['spiral_progress']['Row']
+
+// Spiral Dynamics enums and interfaces
+export type SpiralLevel = 'beige' | 'purple' | 'red' | 'blue' | 'orange' | 'green' | 'yellow' | 'turquoise' | 'coral'
+export type XpType = 'foundation' | 'growth_edge' | 'integration' | 'mastery' | 'transition'
+export type ProgressionStep = 1 | 2 | 3 | 4 | 5 | 6 // The 6 mechanics of moving up
+
+export interface SpiralJourneyMetrics {
+  current_step: ProgressionStep
+  step_progress: number // 0-100
+  problem_pressure_score: number
+  cognitive_bandwidth_score: number
+  window_opportunity_open: boolean
+  next_level_glimpses_count: number
+  supportive_container_strength: number
+  practice_integration_score: number
+}
+
+export interface ChallengeSuccessCriteria {
+  completion_time?: number
+  quality_threshold?: number
+  specific_actions?: string[]
+  reflection_required?: boolean
+}
+
+export interface UpgradeTools {
+  type: string
+  description: string
+  resources?: string[]
+  practices?: string[]
+}
 
 // Specific metric types for different categories
 export interface FitnessMetrics {
