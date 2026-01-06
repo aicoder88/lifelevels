@@ -4,18 +4,9 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CHALLENGE_TEMPLATES, XP_SYSTEM } from '@/lib/constants'
-import { GrowthChallenge, SpiralLevel, ProgressionStep } from '@/lib/database.types'
+import { CHALLENGE_TEMPLATES } from '@/lib/constants'
+import { SpiralLevel, ProgressionStep } from '@/lib/database.types'
 import { Trophy, Clock, Zap, Target, CheckCircle, Star } from 'lucide-react'
-
-interface ChallengeGeneratorProps {
-  currentLevel: SpiralLevel
-  currentStep: ProgressionStep
-  userCapacity: number // 1-5 scale
-  onChallengeAccept: (challenge: any) => void
-  onChallengeComplete: (challengeId: string, quality: number) => void
-  className?: string
-}
 
 interface GeneratedChallenge {
   id: string
@@ -25,14 +16,34 @@ interface GeneratedChallenge {
   title: string
   description: string
   personalizedDescription: string
-  upgrade_tools: any
+  upgrade_tools: string[]
   xp_reward: number
   difficulty_level: number
   estimated_time: string
-  success_criteria: any
+  success_criteria: { metric: string; target: number; description: string }[]
   is_active: boolean
   created_at: string
   isGenerated: boolean
+}
+
+interface ChallengeTemplate {
+  target_step: number
+  type: string
+  title: string
+  description: string
+  upgrade_tools: string[]
+  xp_reward: number
+  difficulty: number
+  estimated_time?: string
+}
+
+interface ChallengeGeneratorProps {
+  currentLevel: SpiralLevel
+  currentStep: ProgressionStep
+  userCapacity: number // 1-5 scale
+  onChallengeAccept: (challenge: GeneratedChallenge) => void
+  onChallengeComplete: (challengeId: string, quality: number) => void
+  className?: string
 }
 
 export function ChallengeGenerator({ 
@@ -51,12 +62,12 @@ export function ChallengeGenerator({
   const generateChallenges = () => {
     setIsGenerating(true)
     
-    const templates = CHALLENGE_TEMPLATES[currentLevel] || []
+    const templates = (CHALLENGE_TEMPLATES[currentLevel] || []) as ChallengeTemplate[]
     const stepRelevantTemplates = templates.filter(
-      (template: any) => template.target_step === currentStep || Math.abs(template.target_step - currentStep) <= 1
+      (template) => template.target_step === currentStep || Math.abs(template.target_step - currentStep) <= 1
     )
-    
-    const challenges: GeneratedChallenge[] = stepRelevantTemplates.map((template: any, index: number) => ({
+
+    const challenges: GeneratedChallenge[] = stepRelevantTemplates.map((template, index) => ({
       id: `generated-${currentLevel}-${currentStep}-${index}`,
       spiral_level: currentLevel,
       target_step: template.target_step,
@@ -116,22 +127,42 @@ export function ChallengeGenerator({
     return Math.round(baseXp * capacityMultiplier)
   }
 
-  const generateSuccessCriteria = (challengeType: string, level: SpiralLevel) => {
-    const baseCriteria = {
-      completion_time: 30,
-      quality_threshold: 3,
-      reflection_required: true
+  const generateSuccessCriteria = (_challengeType: string, level: SpiralLevel): { metric: string; target: number; description: string }[] => {
+    const baseCriteria = [
+      { metric: 'completion_time', target: 30, description: 'Complete within 30 minutes' },
+      { metric: 'quality_threshold', target: 3, description: 'Achieve quality score of 3+' },
+      { metric: 'reflection_required', target: 1, description: 'Complete reflection exercise' }
+    ]
+
+    const levelSpecificActions: Partial<Record<SpiralLevel, { metric: string; target: number; description: string }[]>> = {
+      red: [
+        ...baseCriteria,
+        { metric: 'strength', target: 1, description: 'Demonstrate strength' },
+        { metric: 'results', target: 1, description: 'Show measurable results' }
+      ],
+      blue: [
+        ...baseCriteria,
+        { metric: 'structure', target: 1, description: 'Follow established structure' },
+        { metric: 'purpose', target: 1, description: 'Serve a higher purpose' }
+      ],
+      orange: [
+        ...baseCriteria,
+        { metric: 'measurement', target: 1, description: 'Measure and track results' },
+        { metric: 'optimization', target: 1, description: 'Optimize the process' }
+      ],
+      green: [
+        ...baseCriteria,
+        { metric: 'inclusion', target: 1, description: 'Include others in the process' },
+        { metric: 'consensus', target: 1, description: 'Build consensus' }
+      ],
+      yellow: [
+        ...baseCriteria,
+        { metric: 'connections', target: 1, description: 'See systemic connections' },
+        { metric: 'integration', target: 1, description: 'Integrate multiple perspectives' }
+      ]
     }
-    
-    const levelSpecificCriteria: Partial<Record<SpiralLevel, typeof baseCriteria & { specific_actions: string[] }>> = {
-      red: { ...baseCriteria, specific_actions: ['Demonstrate strength', 'Show results'] },
-      blue: { ...baseCriteria, specific_actions: ['Follow structure', 'Serve purpose'] },
-      orange: { ...baseCriteria, specific_actions: ['Measure results', 'Optimize process'] },
-      green: { ...baseCriteria, specific_actions: ['Include others', 'Build consensus'] },
-      yellow: { ...baseCriteria, specific_actions: ['See connections', 'Integrate perspectives'] }
-    }
-    
-    return levelSpecificCriteria[level] || baseCriteria
+
+    return levelSpecificActions[level] || baseCriteria
   }
 
   const handleAcceptChallenge = (challenge: GeneratedChallenge) => {
@@ -164,6 +195,7 @@ export function ChallengeGenerator({
 
   useEffect(() => {
     generateChallenges()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLevel, currentStep, userCapacity])
 
   return (

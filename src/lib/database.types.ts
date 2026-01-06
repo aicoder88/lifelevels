@@ -510,6 +510,11 @@ export type SpiralLevel = 'beige' | 'purple' | 'red' | 'blue' | 'orange' | 'gree
 export type XpType = 'foundation' | 'growth_edge' | 'integration' | 'mastery' | 'transition'
 export type ProgressionStep = 1 | 2 | 3 | 4 | 5 | 6 // The 6 mechanics of moving up
 
+export interface LevelThreshold {
+  min: number
+  max: number
+}
+
 export interface SpiralJourneyMetrics {
   current_step: ProgressionStep
   step_progress: number // 0-100

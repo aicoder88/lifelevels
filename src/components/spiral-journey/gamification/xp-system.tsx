@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { XP_SYSTEM } from '@/lib/constants'
-import { SpiralLevel, XpType, SpiralXpLog } from '@/lib/database.types'
+import { SpiralLevel, XpType, SpiralXpLog, LevelThreshold } from '@/lib/database.types'
 import { Trophy, Star, TrendingUp, Zap, Target } from 'lucide-react'
 
 interface XpSystemProps {
@@ -58,7 +58,7 @@ export function XpSystem({
   }, [recentXpLogs])
 
   // Get current level thresholds
-  const currentThreshold = (XP_SYSTEM.level_thresholds as any)[currentLevel] || { min: 0, max: 1000 }
+  const currentThreshold = (XP_SYSTEM.level_thresholds as Record<SpiralLevel, LevelThreshold>)[currentLevel] || { min: 0, max: 1000 }
   const progressInLevel = totalXp - currentThreshold.min
   const levelRange = currentThreshold.max - currentThreshold.min
   const progressPercentage = Math.min((progressInLevel / levelRange) * 100, 100)
@@ -67,7 +67,7 @@ export function XpSystem({
   const levelOrder: SpiralLevel[] = ['beige', 'purple', 'red', 'blue', 'orange', 'green', 'yellow', 'turquoise', 'coral']
   const currentIndex = levelOrder.indexOf(currentLevel)
   const nextLevel = currentIndex < levelOrder.length - 1 ? levelOrder[currentIndex + 1] : null
-  const nextThreshold = nextLevel ? (XP_SYSTEM.level_thresholds as any)[nextLevel] : null
+  const nextThreshold = nextLevel ? (XP_SYSTEM.level_thresholds as Record<SpiralLevel, LevelThreshold>)[nextLevel] : null
   const xpToNextLevel = nextThreshold ? nextThreshold.min - totalXp : 0
 
   // Check for level up

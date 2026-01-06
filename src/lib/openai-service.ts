@@ -2,6 +2,17 @@ interface OpenAIConfig {
   apiKey: string
 }
 
+interface PersonalizedAction {
+  id: string
+  title: string
+  description: string
+  type: 'urgent' | 'important' | 'routine'
+  estimatedTime: string
+  category: string
+  priority: number
+  reasoning: string
+}
+
 class OpenAIService {
   private config: OpenAIConfig | null = null
 
@@ -29,7 +40,7 @@ class OpenAIService {
     return this.config !== null && this.config.apiKey.length > 0
   }
 
-  async generatePersonalizedAction(context: string): Promise<any> {
+  async generatePersonalizedAction(context: string): Promise<PersonalizedAction> {
     if (!this.isConfigured()) {
       throw new Error('OpenAI API key not configured')
     }
@@ -56,7 +67,7 @@ class OpenAIService {
     }
   }
 
-  async getCoachingAdvice(context: string, currentAction?: any, userMessage?: string): Promise<string> {
+  async getCoachingAdvice(context: string, currentAction?: PersonalizedAction, userMessage?: string): Promise<string> {
     if (!this.isConfigured()) {
       throw new Error('OpenAI API key not configured')
     }

@@ -125,7 +125,7 @@ Return only the JSON object, no additional text.`
     try {
       const actionData = JSON.parse(response)
       return NextResponse.json({ action: actionData })
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse AI response:', response)
       return NextResponse.json(
         { error: 'Invalid AI response format' },

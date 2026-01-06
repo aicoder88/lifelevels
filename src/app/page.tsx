@@ -19,9 +19,42 @@ interface NextAction {
   reasoning: string
 }
 
+interface Streak {
+  current: number
+  longest: number
+  lastActivity: Date
+}
+
+interface UserContext {
+  currentTime: Date
+  timeOfDay: string
+  isWorkDay: boolean
+  completedToday: string[]
+  schedule: {
+    wakeTime: string
+    sleepTime: string
+    workStart: string
+    workEnd: string
+    workDays: string[]
+  }
+  supplements: Array<{
+    name: string
+    dosage: string
+    timing: string
+    lastTaken?: Date
+  }>
+  goals: Record<string, {
+    target: string | number
+    current: string | number
+    deadline?: Date
+    priority: number
+  }>
+  streaks: Record<string, Streak>
+}
+
 export default function SimplifiedHomePage() {
   const [nextAction, setNextAction] = useState<NextAction | null>(null)
-  const [userContext, setUserContext] = useState<any>(null)
+  const [userContext, setUserContext] = useState<UserContext | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -260,7 +293,7 @@ export default function SimplifiedHomePage() {
               {/* Current Streaks */}
               {userContext?.streaks && Object.keys(userContext.streaks).length > 0 && (
                 <div className="mt-4 flex justify-center gap-4 text-xs">
-                  {Object.entries(userContext.streaks).slice(0, 3).map(([category, streak]: [string, any]) => (
+                  {Object.entries(userContext.streaks).slice(0, 3).map(([category, streak]: [string, Streak]) => (
                     <div key={category} className="flex items-center gap-1">
                       <span className="capitalize">{category.replace('_', ' ')}</span>
                       <span className="font-medium">{streak.current}🔥</span>

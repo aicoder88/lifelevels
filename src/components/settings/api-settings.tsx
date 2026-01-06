@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { openaiService } from '@/lib/openai-service'
 import { aiMemory } from '@/lib/ai-memory'
@@ -83,10 +82,8 @@ export function APISettings() {
       })
       
       // Update supplements in AI memory
-      settings.supplements.forEach(supplement => {
-        // This would ideally check if supplement already exists
-        // For now, we'll just ensure the memory has the latest supplements
-      })
+      // Note: supplements are synced through the schedule update above
+      // Additional per-supplement syncing could be added here if needed
       
       // Here you would also save to your database via API
       // await fetch('/api/settings', { method: 'POST', body: JSON.stringify(settings) })

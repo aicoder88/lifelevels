@@ -88,7 +88,7 @@ export default function SpiralJourneyPage() {
   const [xpLogs, setXpLogs] = useState<SpiralXpLog[]>(mockXpLogs)
   const [totalXp, setTotalXp] = useState(4250)
   const [showAssessment, setShowAssessment] = useState(false)
-  const [userCapacity, setUserCapacity] = useState(3) // 1-5 scale
+  const [userCapacity] = useState(3) // 1-5 scale - reserved for future capacity-based features
 
   const currentLevel = spiralProgress.current_level as SpiralLevel
   const currentStep = journeyState.current_step as ProgressionStep
@@ -122,7 +122,7 @@ export default function SpiralJourneyPage() {
     setXpLogs(prev => [newXpLog, ...prev])
   }
 
-  const handleChallengeAccept = (challenge: any) => {
+  const handleChallengeAccept = (challenge: { id: string; title: string }) => {
     console.log('Challenge accepted:', challenge)
     // In real app, save to database
   }
@@ -167,7 +167,7 @@ export default function SpiralJourneyPage() {
     setXpLogs(prev => [transitionXpLog, ...prev])
   }
 
-  const handleAssessmentComplete = (primaryLevel: string, secondaryLevel: string, insights: any) => {
+  const handleAssessmentComplete = (primaryLevel: string) => {
     const newLevel = primaryLevel as SpiralLevel
     setSpiralProgress(prev => ({
       ...prev,
@@ -229,7 +229,7 @@ export default function SpiralJourneyPage() {
             <h2 className="text-3xl font-bold mb-2">Your Developmental Journey 🌀</h2>
             <p className="text-muted-foreground">
               Progress through the 6 mechanics of moving up to reach your next level of consciousness.
-              You're currently at <span className="font-medium capitalize">{currentLevel}</span> level, 
+              You&apos;re currently at <span className="font-medium capitalize">{currentLevel}</span> level, 
               working on <span className="font-medium">Step {currentStep}</span>.
             </p>
           </div>
